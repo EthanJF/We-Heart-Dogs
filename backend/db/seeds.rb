@@ -10,9 +10,14 @@
 #     Rating.create(value:rand(10..20), dog_id: dog.id)
 # end
 
+Comment.destroy_all
+Like.destroy_all
+Rating.destroy_all
+Dog.destroy_all
+
 parsedDogs = JSON.parse(File.read('cuteemergency.json'))
 parsedDogs2 = JSON.parse(File.read('cutestpetdogs.json'))
-parsedDogs3 = JSON.parse(File.read('thedaiiypuppy.json'))
+# parsedDogs3 = JSON.parse(File.read('thedaiiypuppy.json'))
 # parsedDogs4 = JSON.parse(File.read('dog_feelings.json'))
 
 newDogs = parsedDogs.select do |dog|
@@ -35,15 +40,15 @@ newDogs2.each do |dog|
     Dog.create(image_url: dog.deep_find("media_url"))
 end
 
-newDogs3 = parsedDogs3.select do |dog|
-    dog.extend Hashie::Extensions::DeepFind
-    dog.deep_find("media_url")
-end
+# newDogs3 = parsedDogs3.select do |dog|
+#     dog.extend Hashie::Extensions::DeepFind
+#     dog.deep_find("media_url")
+# end
 
-newDogs3.each do |dog|
-    dog.extend Hashie::Extensions::DeepFind
-    Dog.create(image_url: dog.deep_find("media_url"))
-end
+# newDogs3.each do |dog|
+#     dog.extend Hashie::Extensions::DeepFind
+#     Dog.create(image_url: dog.deep_find("media_url"))
+# end
 
 Dog.all.each do |dog|
     Rating.create(value:rand(10..20), dog_id: dog.id)
