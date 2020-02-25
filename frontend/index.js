@@ -3,14 +3,15 @@ const dogModal = document.querySelector(".modal")
 const span = document.getElementsByClassName("close")[0];
 
 // initial fetch
-let allDogs = async () => {
-    let response = await fetch("http://localhost:3000/dogs")
-    let fetchedDogs = await response.json()
-   return fetchedDogs
+function allDogs(){
+    fetch("http://localhost:3000/dogs")
+    .then(r => r.json())
+    .then(allDogs => {
+        allDogs.map(dog => {
+            createDog(dog)
+        })
+    })
 }
-// function that runs the whole gosh darn thing
-let main = async () => {
-const dogs = await allDogs()
 
 // click to turn modal off
 span.onclick = function () {
@@ -188,8 +189,6 @@ let newComment = (dog, modalContent) => {
     })
     let lineBreak1 = document.createElement("br")
     let lineBreak2 = document.createElement("br")
-    let lineBreak3 = document.createElement("br")
-    let lineBreak4 = document.createElement("br")
 
     commentForm.append(authorInput, lineBreak1, contentInput, lineBreak2, commentSubmitButton)
   
@@ -248,16 +247,14 @@ let createNewComment = async (dog, modalContent, authorInput, contentInput) => {
     newCommentLi.innerText = `${createdComment.author} said: ${createdComment.content}`
     let commentsUl = document.querySelector("#comments-ul")
     commentsUl.append(newCommentLi)
+    modalContent.append(commentsUl)
 }   
 
     // initial load -- displays all fetched dogs
     let loadHome = () => {
         clearDogs()
         topFunction()
-        dogs.forEach((dog) => {
-            //create dog function
-            createDog(dog)
-        })
+        allDogs()
     }
 
     // nav bar: home
@@ -266,15 +263,19 @@ let createNewComment = async (dog, modalContent, authorInput, contentInput) => {
 
     // nav bar: highest rated
     let topDogs = () => {
-        let sortedDogs = [...dogs].sort((a, b) => (a.rating.value < b.rating.value) ? 1 : -1)
+        fetch("http://localhost:3000/dogs")
+            .then(r => r.json())
+            .then(allDogs => {
+                let sortedDogs = [...allDogs].sort((a, b) => (a.rating.value < b.rating.value) ? 1 : -1)
 
-        clearDogs()
-        topFunction()
+                clearDogs()
+                topFunction()
 
-        sortedDogs.forEach((dog) => {
-           //create dog function
-        createDog(dog)
-        })
+                sortedDogs.forEach((dog) => {
+                    //create dog function
+                    createDog(dog)
+                })
+            })
     }
 
     
@@ -283,15 +284,20 @@ let createNewComment = async (dog, modalContent, authorInput, contentInput) => {
 
     // nav bar: most popular
     let mostPopularDogs = () => {
-        let sortedDogs = [...dogs].sort((a, b) => (a.likes.length < b.likes.length) ? 1 : -1)
+        fetch("http://localhost:3000/dogs")
+            .then(r => r.json())
+            .then(allDogs => {
+                let sortedDogs = [...allDogs].sort((a, b) => (a.likes.length < b.likes.length) ? 1 : -1)
 
-        clearDogs()
-        topFunction()
+                clearDogs()
+                topFunction()
 
-        sortedDogs.forEach((dog) => {
-           //create dog function
-        createDog(dog)
-        })
+                sortedDogs.forEach((dog) => {
+                    //create dog function
+                    createDog(dog)
+                })
+            })
+
     }
 
    let mostPopularDogsButton = document.querySelector("#popular-dogs")
@@ -299,15 +305,20 @@ let createNewComment = async (dog, modalContent, authorInput, contentInput) => {
 
     // nav bar: most commented
     let mostCommentedDogs =  () => {
-        let sortedDogs = [...dogs].sort((a, b) => (a.comments.length < b.comments.length) ? 1 : -1)
+        fetch("http://localhost:3000/dogs")
+            .then(r => r.json())
+            .then(allDogs => {
+                let sortedDogs = [...allDogs].sort((a, b) => (a.comments.length < b.comments.length) ? 1 : -1)
 
-        clearDogs()
-        topFunction()
+                clearDogs()
+                topFunction()
 
-        sortedDogs.forEach((dog) => {
-           //create dog function
-        createDog(dog)
-        })
+                sortedDogs.forEach((dog) => {
+                    //create dog function
+                    createDog(dog)
+                })
+            })
+
     }
 
     let mostCommentedDogsButton = document.querySelector("#commented-dogs")
@@ -335,7 +346,3 @@ function scrollFunction() {
 
     // runs initial page load
     loadHome()
-
-}
-// runs the whole thing
-main()
