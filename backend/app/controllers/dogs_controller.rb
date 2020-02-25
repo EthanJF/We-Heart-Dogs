@@ -2,7 +2,7 @@ class DogsController < ApplicationController
     def index
         dogs = Dog.all
         render json: dogs.to_json(:include => {
-      :rating => {:only => [:id, :dog_id, :value]},
+      :ratings => {:only => [:id, :dog_id, :value]},
       :comments => {:only => [:id, :dog_id, :author, :content]},
       :likes => {:only => [:id, :dog_id]}
     })
@@ -10,8 +10,8 @@ class DogsController < ApplicationController
 
     def show
       dog = Dog.find(params[:id])
-      render json: dogs.to_json(:include => {
-        :rating => {:only => [:id, :dog_id, :value]},
+      render json: dog.to_json(:include => {
+        :ratings => {:only => [:id, :dog_id, :value]},
         :comments => {:only => [:id, :dog_id, :author, :content]},
         :likes => {:only => [:id, :dog_id]}
       })
@@ -20,8 +20,8 @@ class DogsController < ApplicationController
     def update
       dog = Dog.find(params[:id])
       if dog.update(dog_params)
-        render json: dogs.to_json(:include => {
-          :rating => {:only => [:id, :dog_id, :value]},
+        render json: dog.to_json(:include => {
+          :ratings => {:only => [:id, :dog_id, :value]},
           :comments => {:only => [:id, :dog_id, :author, :content]},
           :likes => {:only => [:id, :dog_id]}
         })

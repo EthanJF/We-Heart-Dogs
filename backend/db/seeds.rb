@@ -1,15 +1,3 @@
-# records = RestClient.get 'https://random.dog/doggos?filter=mp4,webm'
-
-# parsedRecords = JSON.parse(records)
-
-# parsedRecords.each do |record|
-#     Dog.create(image_url: "https://random.dog/#{record}")
-# end
-
-# Dog.all.each do |dog|
-#     Rating.create(value:rand(10..20), dog_id: dog.id)
-# end
-
 Comment.destroy_all
 Like.destroy_all
 Rating.destroy_all
@@ -17,8 +5,6 @@ Dog.destroy_all
 
 parsedDogs = JSON.parse(File.read('cuteemergency.json'))
 parsedDogs2 = JSON.parse(File.read('cutestpetdogs.json'))
-# parsedDogs3 = JSON.parse(File.read('thedaiiypuppy.json'))
-# parsedDogs4 = JSON.parse(File.read('dog_feelings.json'))
 
 newDogs = parsedDogs.select do |dog|
     dog.extend Hashie::Extensions::DeepFind
@@ -40,18 +26,10 @@ newDogs2.each do |dog|
     Dog.create(image_url: dog.deep_find("media_url"))
 end
 
-# newDogs3 = parsedDogs3.select do |dog|
-#     dog.extend Hashie::Extensions::DeepFind
-#     dog.deep_find("media_url")
-# end
-
-# newDogs3.each do |dog|
-#     dog.extend Hashie::Extensions::DeepFind
-#     Dog.create(image_url: dog.deep_find("media_url"))
-# end
-
 Dog.all.each do |dog|
+    5.times do
     Rating.create(value:rand(10..20), dog_id: dog.id)
+    end
 end
 
 adjectives = ["cute", "adorable", "beautiful", "sweet","goofy","attractive", "handsome", "precious", "cuddly", "beloved", "big", "smol", "furry", "fuzzy", "dashing", "good", "gorgeous", "huggable", "perfect", "pretty", "regal", "scruffy", "shiny", "sleek", "soft", "snuggly", "wonderful"]

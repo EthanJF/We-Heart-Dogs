@@ -9,6 +9,11 @@ class RatingsController < ApplicationController
         render json: rating
     end
 
+    def create
+        rating = Rating.create(ratings_params)
+        render json: rating
+    end
+
     def update
         rating = Rating.find(params[:id])
     if rating.update(ratings_params)
@@ -21,6 +26,6 @@ class RatingsController < ApplicationController
     private
 
     def ratings_params
-        params.require(:rating).permit(:value)
+        params.require(:rating).permit(:value, :dog_id)
     end
 end

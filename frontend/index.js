@@ -74,76 +74,81 @@ let newLike = async (dog) => {
 }  
 
 // show modal display function
-let showDog = (dog) => {
+let showDog = (thisDog) => {
     // get modal
-    let modalContent = document.querySelector("#dog-modal")
-    let dogLikes = dog.likes.length
+    fetch(`http://localhost:3000/dogs/${thisDog.id}`)
+    .then( r => r.json())
+    .then( dog => {
+        let modalContent = document.querySelector("#dog-modal")
+        let dogLikes = dog.likes.length
 
-    // clear previous content
-    let child = modalContent.lastElementChild;
-    while (child) {
-        modalContent.removeChild(child);
-        child = modalContent.lastElementChild;
-    }
-    // add dog img to modal
-    let modalImg = document.createElement("img")
-    modalImg.setAttribute("class", "modal-img")
-    modalImg.src = dog.image_url
+        // clear previous content
+        let child = modalContent.lastElementChild;
+        while (child) {
+            modalContent.removeChild(child);
+            child = modalContent.lastElementChild;
+        }
+        // add dog img to modal
+        let modalImg = document.createElement("img")
+        modalImg.setAttribute("class", "modal-img")
+        modalImg.src = dog.image_url
 
-    // add like button
-    let likeButton = document.createElement("button")
-    likeButton.setAttribute("id",'like-button') 
-    likeButton.setAttribute("class",'like-button')
-    likeButton.innerText = "♥️"
+        // add like button
+        let likeButton = document.createElement("button")
+        likeButton.setAttribute("id", 'like-button')
+        likeButton.setAttribute("class", 'like-button')
+        likeButton.innerText = "♥️"
 
-    likeButton.addEventListener("mousedown", () => {
-        likeButton.classList.add('animated', 'heartBeat')
-        newLike(dog)
-        dogLikes += 1
+        likeButton.addEventListener("mousedown", () => {
+            likeButton.classList.add('animated', 'heartBeat')
+            newLike(dog)
+            dogLikes += 1
+            modalLikes.innerText = `Likes: ${dogLikes}`
+            likeButton.addEventListener('mouseup', function () { likeButton.classList.remove('animated', 'heartBeat') })
+        })
+
+        let modalLikes = document.createElement("h3")
+        modalLikes.setAttribute("class", "modal-likes")
         modalLikes.innerText = `Likes: ${dogLikes}`
-        likeButton.addEventListener('mouseup', function () { likeButton.classList.remove('animated', 'heartBeat') })
-    })
-    
-    let modalLikes = document.createElement("h3")
-    modalLikes.setAttribute("class", "modal-likes")
-    modalLikes.innerText = `Likes: ${dogLikes}`
 
-    // add rating to modal
-    let currentRating = (typeof dog.rating.value === "number") ? dog.rating.value : 10
-    let modalRating = document.createElement('h3')
-    modalRating.setAttribute("class", "modal-rating")
-    modalRating.innerText = `Rating: ${currentRating}/10`
+        // add rating to modal
+        // let currentRating = (typeof dog.rating.value === "number") ? dog.rating.value : 10
+        let currentRating = Math.round((dog.ratings.reduce((result, rating) => (result + rating.value), 0) / dog.ratings.length) * 10) / 10
+        let modalRating = document.createElement('h3')
+        modalRating.setAttribute("class", "modal-rating")
+        modalRating.innerText = `Rating: ${currentRating}/10`
 
-    // add rate dog link to modal
+        // add rate dog link to modal
 
-    let ratingInput = document.createElement("input")
-    ratingInput.type = "number"
-    ratingInput.setAttribute("class", "rating-input")
-    
-    let ratingSubmitButton = document.createElement("button")
-    ratingSubmitButton.innerText = "Rate This Dog"
-    ratingSubmitButton.setAttribute("class", "submit-button")
-    
-    
-    //add event listener to addRating
-    addEventListenerToAddRating(ratingInput, ratingSubmitButton, modalRating, dog)
+        let ratingInput = document.createElement("input")
+        ratingInput.type = "number"
+        ratingInput.setAttribute("class", "rating-input")
+
+        let ratingSubmitButton = document.createElement("button")
+        ratingSubmitButton.innerText = "Rate This Dog"
+        ratingSubmitButton.setAttribute("class", "submit-button")
+
+
+        //add event listener to addRating
+        addEventListenerToAddRating(ratingInput, ratingSubmitButton, modalRating, dog)
 
         // create comments display
         let commentsUl = document.createElement('ul')
         commentsUl.setAttribute("id", "comments-ul")
         let commentsHeader = document.createElement('h3')
         commentsHeader.innerText = "Comments"
-        comments = dog.comments
+        let comments = dog.comments.sort((a, b) => a.id - b.id)
         comments.forEach(comment => {
             // create li
+            debugger
             let commentLi = document.createElement('li')
             commentLi.innerText = `${comment.author} said: ${comment.content}`
-            
+
             // append
             commentsUl.appendChild(commentLi)
         })
-        
-        
+
+
         // append content to modal 
         let lineBreak1 = document.createElement("br")
         let lineBreak2 = document.createElement("br")
@@ -155,7 +160,9 @@ let showDog = (dog) => {
         newComment(dog, modalContent)
         modalContent.append(commentsUl)
 
-    dogModal.style.display = "block";
+        dogModal.style.display = "block";
+    })
+
 }
 
 // add comment 
@@ -200,25 +207,30 @@ let addEventListenerToAddRating = (ratingInput, submitButton, modalRating, dog) 
         submitButton.addEventListener("click", (event) => {
             event.preventDefault()
             if (ratingInput.value.length < 1){
-                alert("Please enter a  rating!");
+                alert("Please enter a rating!");
                 return false;
             } 
             else {
-                let currentRating = (typeof dog.rating.value === "number") ? dog.rating.value : 10
-                let newRating = (parseInt(currentRating) + parseInt((ratingInput.value)/10))
-                fetch(`http://localhost:3000/ratings/${dog.rating.id}`, {
-                    method: "PATCH",
+                // let currentRating = (typeof dog.rating.value === "number") ? dog.rating.value : 10
+                let ratingTotal = dog.ratings.reduce((result, rating) => (result + rating.value), 0)
+
+
+                // let newRating = (parseInt(currentRating) + parseInt((ratingInput.value)/10))
+                let newRating = ratingInput.value
+                fetch("http://localhost:3000/ratings/", {
+                    method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         "Accept": "application/json"
                     },
                     body: JSON.stringify({
-                        value: newRating
+                        value: newRating,
+                        dog_id: dog.id
                     })
                 })
                 .then(r => r.json())
                 .then(resObj => {
-                    modalRating.innerText = `${resObj.value}/10`
+                    modalRating.innerText = `${Math.round((ratingTotal + resObj.value) / (dog.ratings.length + 1) * 10) / 10}/10`
                 })
             }
         })
@@ -242,7 +254,7 @@ let createNewComment = async (dog, modalContent, authorInput, contentInput) => {
         })
     })
     let createdComment = await response.json()
-    showDog(dog)
+    // showDog(dog)
     let newCommentLi = document.createElement("li")
     newCommentLi.innerText = `${createdComment.author} said: ${createdComment.content}`
     let commentsUl = document.querySelector("#comments-ul")
@@ -266,7 +278,7 @@ let createNewComment = async (dog, modalContent, authorInput, contentInput) => {
         fetch("http://localhost:3000/dogs")
             .then(r => r.json())
             .then(allDogs => {
-                let sortedDogs = [...allDogs].sort((a, b) => (a.rating.value < b.rating.value) ? 1 : -1)
+                let sortedDogs = [...allDogs].sort((a, b) => (a.ratings.reduce((result, rating) => (result + rating.value), 0) / a.ratings.length < b.ratings.reduce((result, rating) => (result + rating.value), 0) / b.ratings.length) ? 1 : -1)
 
                 clearDogs()
                 topFunction()
